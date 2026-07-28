@@ -155,77 +155,50 @@
         });
     });
 
-    /* ---------- Transport: play / pause / restart, stepping verse by verse ---------- */
-    const verses = Array.from(document.querySelectorAll('.verse'));
+    /* ---------- Transport: one continuous, read-paced glide ---------- */
     const playPauseBtn = document.getElementById('playPauseBtn');
     const restartBtn = document.getElementById('restartBtn');
 
-    const TRANSITION_MS = 650;
-    const MIN_DWELL = 1900;
-    const MAX_DWELL = 4400;
-    const WORDS_PER_SECOND = 5.4;
+    // Pixels of scroll per second — the whole reading drifts by at a
+    // steady, readable pace with no stops. Lower = slower.
+    const SCROLL_SPEED = 95;
 
-    let currentIndex = 0;
     let playing = false;
-    let cancelled = false;
+    let rafId = null;
+    let lastTime = 0;
+    let scrollPos = 0;
 
-    function dwellFor(verseEl) {
-        const words = verseEl.querySelector('.verse-text').textContent.trim().split(/\s+/).length;
-        const ms = (words / WORDS_PER_SECOND) * 1000 + 500;
-        return Math.min(MAX_DWELL, Math.max(MIN_DWELL, ms));
-    }
+    function frame(now) {
+        if (!playing) return;
+        const dt = Math.min((now - lastTime) / 1000, 0.1); // clamp after tab-switch stalls
+        lastTime = now;
 
-    function targetScrollFor(el) {
-        const rect = el.getBoundingClientRect();
-        const elTop = rect.top + window.scrollY;
-        const target = elTop - (window.innerHeight / 2 - rect.height / 2);
-        return Math.min(Math.max(target, 0), maxScroll());
-    }
+        const end = maxScroll();
+        scrollPos = Math.min(scrollPos + SCROLL_SPEED * dt, end);
+        // 'instant' bypasses the page's CSS smooth-scroll, which otherwise
+        // fights the per-frame updates and stalls the glide near the top.
+        window.scrollTo({ top: scrollPos, behavior: 'instant' });
 
-    function easeInOutQuad(t) {
-        return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-    }
-
-    function scrollToEl(el, duration) {
-        return new Promise((resolve) => {
-            const startY = window.scrollY;
-            const endY = targetScrollFor(el);
-            const distance = endY - startY;
-            if (Math.abs(distance) < 2) return resolve();
-            const start = performance.now();
-            function step(now) {
-                if (cancelled) return resolve();
-                const t = Math.min((now - start) / duration, 1);
-                window.scrollTo(0, startY + distance * easeInOutQuad(t));
-                if (t < 1) requestAnimationFrame(step);
-                else resolve();
-            }
-            requestAnimationFrame(step);
-        });
-    }
-
-    function wait(ms) {
-        return new Promise((resolve) => setTimeout(resolve, ms));
-    }
-
-    async function play(fromIndex = currentIndex) {
-        cancelled = false;
-        playing = true;
-        updatePlayButton();
-        for (let i = fromIndex; i < verses.length; i++) {
-            if (cancelled) return;
-            currentIndex = i;
-            await scrollToEl(verses[i], TRANSITION_MS);
-            if (cancelled) return;
-            await wait(dwellFor(verses[i]));
+        if (scrollPos >= end) {
+            playing = false;
+            updatePlayButton();
+            return;
         }
-        playing = false;
+        rafId = requestAnimationFrame(frame);
+    }
+
+    function play() {
+        if (playing) return;
+        playing = true;
+        scrollPos = window.scrollY;          // resume from wherever we are
+        lastTime = performance.now();
         updatePlayButton();
+        rafId = requestAnimationFrame(frame);
     }
 
     function pause() {
-        cancelled = true;
         playing = false;
+        if (rafId) cancelAnimationFrame(rafId);
         updatePlayButton();
     }
 
@@ -235,10 +208,10 @@
     }
 
     function restart() {
-        cancelled = true;
-        currentIndex = 0;
-        window.scrollTo(0, 0);
-        requestAnimationFrame(() => play(0));
+        pause();
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        scrollPos = 0;
+        requestAnimationFrame(play);
     }
 
     ['wheel', 'touchstart', 'keydown'].forEach((evt) =>
@@ -247,7 +220,7 @@
         }, { passive: true })
     );
 
-    playPauseBtn.addEventListener('click', () => (playing ? pause() : play(currentIndex)));
+    playPauseBtn.addEventListener('click', () => (playing ? pause() : play()));
     restartBtn.addEventListener('click', restart);
 
     let ticking = false;
@@ -266,6 +239,6 @@
         observeCreationBadges();
         updatePlayButton();
 
-        if (!reduceMotion) play(0);
+        if (!reduceMotion) play();
     });
 })();
