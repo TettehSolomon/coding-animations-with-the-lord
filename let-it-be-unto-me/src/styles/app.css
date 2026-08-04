@@ -1,0 +1,220 @@
+/* ---------- Layout: a portrait "card" that fills the phone ---------- */
+.app {
+  position: relative;
+  height: 100dvh;
+  width: min(100%, 520px);
+  margin: 0 auto;
+  overflow: hidden;
+  background: #06060f;
+}
+
+/* full-screen UI overlay above the painting */
+.ui {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.ui-top {
+  padding: calc(env(safe-area-inset-top) + 6px) 0 0;
+}
+
+.ui-bottom {
+  padding: 0 0 calc(env(safe-area-inset-bottom) + 10px);
+}
+
+/* re-enable interaction on actual controls */
+.controls,
+.dot,
+.nav-btn,
+.play-btn {
+  pointer-events: auto;
+}
+
+/* ---------- Autoplay progress ---------- */
+.progress-track {
+  height: 3px;
+  margin: 0 10px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.16);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), #fff4d6);
+  box-shadow: 0 0 12px rgba(255, 217, 138, 0.6);
+}
+
+.episode-tag {
+  text-align: center;
+  font-size: 0.66rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(240, 244, 255, 0.82);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
+  padding: 12px 12px 4px;
+}
+
+/* ---------- Stage: painting slideshow (fills the app, behind UI) ---------- */
+.stage {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.painting-layer {
+  position: absolute;
+  inset: 0;
+}
+
+.painting {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  will-change: transform;
+}
+
+/* divine light bloom, warm from the top */
+.bloom {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(90% 55% at 50% -8%, rgba(255, 234, 180, 0.32), transparent 60%),
+    radial-gradient(70% 40% at 70% 0%, rgba(255, 245, 210, 0.18), transparent 55%);
+  mix-blend-mode: screen;
+}
+
+/* vignette + bottom fade so the verse panel reads cleanly */
+.scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to bottom, rgba(4, 5, 12, 0.28) 0%, transparent 22%, transparent 55%, rgba(4, 5, 12, 0.85) 100%),
+    radial-gradient(120% 100% at 50% 40%, transparent 55%, rgba(4, 5, 12, 0.5) 100%);
+}
+
+/* ---------- Verse panel (floats over the painting) ---------- */
+.panel {
+  margin: 0 16px 6px;
+  padding: 4px 6px;
+  min-height: 30vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.caption {
+  font-size: 0.72rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--gold);
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.7);
+  margin-bottom: 0.7rem;
+}
+
+.verse-strong {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(1.3rem, 5.6vw, 1.85rem);
+  line-height: 1.45;
+  color: #fff;
+  margin-bottom: 0.6rem;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.85), 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+.verse-rest {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(1rem, 4vw, 1.3rem);
+  line-height: 1.65;
+  color: rgba(240, 243, 255, 0.92);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9);
+}
+
+.verse-ref {
+  margin-top: 0.9rem;
+  font-size: 0.74rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(255, 217, 138, 0.85);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.7);
+}
+
+/* ---------- Controls ---------- */
+.controls {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px 6px;
+}
+
+.nav-btn {
+  width: 42px;
+  height: 42px;
+  flex: none;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  line-height: 1;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.nav-btn:not(:disabled):hover {
+  background: rgba(255, 217, 138, 0.2);
+  transform: scale(1.06);
+}
+
+.dots {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  gap: 9px;
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.24);
+  transition: all 0.25s ease;
+}
+
+.dot.active {
+  background: var(--gold);
+  box-shadow: 0 0 10px rgba(255, 217, 138, 0.7);
+  transform: scale(1.25);
+}
+
+.play-btn {
+  width: 42px;
+  height: 42px;
+  flex: none;
+  border-radius: 50%;
+  font-size: 0.9rem;
+  background: rgba(255, 217, 138, 0.16);
+  border: 1px solid rgba(255, 217, 138, 0.4);
+  color: var(--gold);
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.play-btn:hover {
+  background: rgba(255, 217, 138, 0.28);
+  transform: scale(1.06);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .star,
+  .light-rays {
+    animation: none !important;
+  }
+}
