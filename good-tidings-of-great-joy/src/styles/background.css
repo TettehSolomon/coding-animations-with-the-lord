@@ -1,0 +1,90 @@
+/* ---------- Persistent background layers (fixed behind the scroll) ---------- */
+.sky-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.stars-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.star-dot {
+  position: absolute;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.9);
+  animation: twinkle ease-in-out infinite;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 1; }
+}
+
+/* ---------- The star of Bethlehem: radial core + conic-gradient rays ---------- */
+.star-of-bethlehem {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  z-index: 2;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.star-core {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, #fff 0%, #ffe9b8 35%, rgba(255, 217, 138, 0.45) 65%, transparent 80%);
+  filter: blur(1px);
+}
+
+.star-rays {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 160px;
+  height: 160px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: conic-gradient(from 0deg,
+    transparent 0deg, rgba(255, 217, 138, 0.55) 3deg, transparent 9deg,
+    transparent 43deg, rgba(255, 217, 138, 0.4) 46deg, transparent 52deg,
+    transparent 88deg, rgba(255, 217, 138, 0.55) 91deg, transparent 97deg,
+    transparent 133deg, rgba(255, 217, 138, 0.4) 136deg, transparent 142deg,
+    transparent 178deg, rgba(255, 217, 138, 0.55) 181deg, transparent 187deg,
+    transparent 223deg, rgba(255, 217, 138, 0.4) 226deg, transparent 232deg,
+    transparent 268deg, rgba(255, 217, 138, 0.55) 271deg, transparent 277deg,
+    transparent 313deg, rgba(255, 217, 138, 0.4) 316deg, transparent 322deg,
+    transparent 358deg);
+  -webkit-mask-image: radial-gradient(circle, black 15%, transparent 70%);
+  mask-image: radial-gradient(circle, black 15%, transparent 70%);
+  filter: blur(2px);
+}
+
+/* ---------- The glory of the Lord: a full-screen additive flash ---------- */
+.glory-flash {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255, 255, 255, 0.95), rgba(255, 244, 214, 0.5) 40%, transparent 72%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .star-dot,
+  .star-rays {
+    animation: none !important;
+  }
+}

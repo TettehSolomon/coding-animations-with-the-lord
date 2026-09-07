@@ -1,0 +1,106 @@
+/* ---------- Layout: a portrait "card" that fills the phone ---------- */
+.app {
+  position: relative;
+  height: 100dvh;
+  width: min(100%, 520px);
+  margin: 0 auto;
+  overflow: hidden;
+  background: #06060f;
+}
+
+/* the only thing that actually scrolls — everything else stays fixed */
+.scroll-container {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+}
+
+.scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* full-screen UI overlay above the scenes */
+.ui {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.ui-top {
+  padding: calc(env(safe-area-inset-top) + 6px) 0 0;
+}
+
+.ui-bottom {
+  padding: 0 0 calc(env(safe-area-inset-bottom) + 10px);
+}
+
+/* re-enable interaction on actual controls */
+.controls,
+.play-btn,
+.restart-btn {
+  pointer-events: auto;
+}
+
+/* ---------- Progress ---------- */
+.progress-track {
+  height: 3px;
+  margin: 0 10px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.16);
+  overflow: hidden;
+}
+
+.progress-fill {
+  width: 100%;
+  height: 100%;
+  transform-origin: 0% 50%;
+  background: linear-gradient(90deg, var(--gold), #fff4d6);
+  box-shadow: 0 0 12px rgba(255, 217, 138, 0.6);
+}
+
+.episode-tag {
+  text-align: center;
+  font-size: 0.66rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(240, 244, 255, 0.82);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
+  padding: 12px 12px 4px;
+}
+
+/* ---------- Controls ---------- */
+.controls {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 16px 20px 6px;
+}
+
+.play-btn,
+.restart-btn {
+  width: 42px;
+  height: 42px;
+  flex: none;
+  border-radius: 50%;
+  font-size: 0.9rem;
+  background: rgba(255, 217, 138, 0.16);
+  border: 1px solid rgba(255, 217, 138, 0.4);
+  color: var(--gold);
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.play-btn:hover,
+.restart-btn:hover {
+  background: rgba(255, 217, 138, 0.28);
+  transform: scale(1.06);
+}

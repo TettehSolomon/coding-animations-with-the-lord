@@ -1,0 +1,198 @@
+/* ---------- Scene shell ---------- */
+.scene {
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+}
+
+.scene-visual {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.scene-panel {
+  position: relative;
+  z-index: 1;
+  margin: 0 16px;
+  padding: 4px 6px calc(140px + env(safe-area-inset-bottom));
+}
+
+.caption {
+  font-size: 0.72rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--gold);
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.7);
+  margin-bottom: 0.7rem;
+}
+
+.verse-strong {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(1.25rem, 5.4vw, 1.8rem);
+  line-height: 1.45;
+  color: #fff;
+  margin-bottom: 0.6rem;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.85), 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+.verse-rest {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(0.95rem, 3.8vw, 1.25rem);
+  line-height: 1.65;
+  color: rgba(240, 243, 255, 0.92);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9);
+}
+
+.verse-ref {
+  margin-top: 0.9rem;
+  font-size: 0.74rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(255, 217, 138, 0.85);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.7);
+}
+
+/* ---------- Hillside silhouettes (Hillside.jsx) ---------- */
+.hillside {
+  position: absolute;
+  left: -8%;
+  right: -8%;
+  bottom: 0;
+  height: 40%;
+}
+
+.hillside .ridge {
+  position: absolute;
+  inset: 0;
+}
+
+.hillside .ridge-back {
+  clip-path: polygon(0% 55%, 18% 38%, 38% 52%, 58% 28%, 78% 48%, 100% 32%, 100% 100%, 0% 100%);
+}
+
+.hillside .ridge-front {
+  clip-path: polygon(0% 72%, 20% 58%, 42% 70%, 62% 50%, 82% 66%, 100% 55%, 100% 100%, 0% 100%);
+}
+
+.hillside--dusk .ridge-back { background: #241a30; }
+.hillside--dusk .ridge-front { background: #120c1c; }
+.hillside--night .ridge-back { background: #141225; }
+.hillside--night .ridge-front { background: #06050d; }
+
+/* ---------- The road, and a traveling glow (SceneDecree) ---------- */
+.road {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 24%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255, 217, 138, 0.3), transparent);
+}
+
+.traveler-glow {
+  position: absolute;
+  bottom: calc(24% - 4px);
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff4d6, rgba(255, 217, 138, 0.5) 60%, transparent 80%);
+  box-shadow: 0 0 12px rgba(255, 217, 138, 0.6);
+}
+
+/* ---------- The manger (MangerGlow.jsx, used by manger & shepherdsVisit) ---------- */
+.manger {
+  position: absolute;
+  left: 50%;
+  bottom: 20%;
+  transform: translateX(-50%);
+  width: 58%;
+  max-width: 240px;
+}
+
+.manger-trough {
+  height: 42px;
+  border-radius: 45% 45% 18% 18% / 70% 70% 20% 20%;
+  background: repeating-linear-gradient(100deg, #7a5a2e 0 3px, #6a4c24 3px 6px);
+  box-shadow: inset 0 -6px 10px rgba(0, 0, 0, 0.4), 0 4px 14px rgba(0, 0, 0, 0.5);
+}
+
+.manger-glow {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 130px;
+  height: 130px;
+  transform: translate(-50%, -62%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 244, 214, 0.9), rgba(255, 217, 138, 0.4) 45%, transparent 75%);
+  filter: blur(6px);
+}
+
+/* ---------- Shepherds & flock (ShepherdSilhouettes.jsx) ---------- */
+.shepherd {
+  position: absolute;
+  bottom: 0;
+  width: 24px;
+}
+
+.shepherd .robe {
+  height: 42px;
+  background: #000;
+  clip-path: polygon(50% 0%, 80% 32%, 100% 100%, 0% 100%, 20% 32%);
+}
+
+.shepherd .head {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #000;
+  margin: 0 auto -3px;
+}
+
+.shepherd--kneeling {
+  width: 22px;
+}
+
+.shepherd--kneeling .robe {
+  height: 26px;
+  clip-path: polygon(50% 0%, 88% 45%, 100% 100%, 0% 100%, 12% 45%);
+}
+
+.flock-dot {
+  position: absolute;
+  border-radius: 50% 50% 45% 45%;
+  background: #2a2a34;
+}
+
+/* ---------- The angel — an abstract luminous form (SceneGoodTidings) ---------- */
+.angel-glow {
+  position: absolute;
+}
+
+.angel-glow .blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(38px);
+  background: radial-gradient(circle, rgba(255, 244, 214, 0.55), transparent 70%);
+}
+
+/* ---------- Light motes — the heavenly host (LightMote.jsx) ---------- */
+.light-mote {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff, var(--gold));
+  box-shadow: 0 0 8px var(--gold);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .traveler-glow {
+    animation: none !important;
+  }
+}
