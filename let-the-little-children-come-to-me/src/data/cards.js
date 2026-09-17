@@ -52,4 +52,4 @@ export const cards = [
   },
 ]
 
-export const DWELL_MS = 5000
+export const DWELL_MS = 8500
