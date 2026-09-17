@@ -5,7 +5,7 @@ export const cards = [
     id: 'talking',
     image: 'talking.jpg',
     theme: 'Talking to Jesus',
-    verse: 'Henceforth I call you not servants... but I have called you friends.',
+    verse: 'Henceforth I call you not servants... but I have called you friends. For everything that I have learned from my Father I have made known unto you.',
     ref: 'John 15:15',
   },
   {
