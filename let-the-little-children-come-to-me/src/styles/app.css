@@ -1,0 +1,180 @@
+/* ---------- Layout: a portrait "card" that fills the phone ---------- */
+.app {
+  position: relative;
+  height: 100dvh;
+  width: min(100%, 520px);
+  margin: 0 auto;
+  overflow: hidden;
+  background: #1c1410;
+}
+
+/* ---------- Story-style segmented progress bar ---------- */
+.ui-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  padding: calc(env(safe-area-inset-top) + 10px) 10px 0;
+  pointer-events: none;
+}
+
+.story-bar {
+  display: flex;
+  gap: 6px;
+}
+
+.story-segment {
+  flex: 1;
+  height: 3px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.28);
+  overflow: hidden;
+}
+
+.story-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--gold), #fff4d6);
+  box-shadow: 0 0 10px rgba(255, 217, 138, 0.5);
+}
+
+.story-fill--active {
+  animation-name: storyFill;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes storyFill {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+.episode-tag {
+  text-align: center;
+  font-size: 0.64rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(255, 248, 238, 0.82);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
+  padding: 12px 4px 0;
+}
+
+/* ---------- Controls ---------- */
+.ui-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  display: flex;
+  justify-content: center;
+  padding: 0 0 calc(env(safe-area-inset-bottom) + 18px);
+  pointer-events: none;
+}
+
+.play-btn {
+  pointer-events: auto;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  font-size: 0.9rem;
+  background: rgba(255, 217, 138, 0.16);
+  border: 1px solid rgba(255, 217, 138, 0.4);
+  color: var(--gold);
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.play-btn:hover {
+  background: rgba(255, 217, 138, 0.28);
+  transform: scale(1.06);
+}
+
+/* ---------- The scene: blurred parallax bg + the tilting card ---------- */
+.card-scene {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.card-bg {
+  position: absolute;
+  inset: -12%;
+  background-size: cover;
+  background-position: center center;
+  filter: blur(22px) brightness(0.6) saturate(1.05);
+}
+
+.card-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(10, 6, 4, 0.35) 0%, rgba(10, 6, 4, 0.15) 40%, rgba(10, 6, 4, 0.75) 100%);
+}
+
+.card-box-anchor {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(78vw, 320px);
+  height: min(60vh, 440px);
+  transform: translate(-50%, -50%);
+}
+
+.card-box {
+  position: absolute;
+  inset: 0;
+  border-radius: 28px;
+  overflow: clip;
+  background-size: cover;
+  background-position: center center;
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.45);
+}
+
+.card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(20, 12, 6, 0) 45%, rgba(20, 12, 6, 0.92) 100%);
+}
+
+.card-info {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 20px 22px calc(env(safe-area-inset-bottom, 0px) + 22px);
+}
+
+.card-theme {
+  font-size: 0.68rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--gold);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.7);
+  margin-bottom: 0.5rem;
+}
+
+.card-verse {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  font-size: clamp(1.02rem, 4.2vw, 1.25rem);
+  line-height: 1.45;
+  color: #fff;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.85);
+}
+
+.card-ref {
+  margin-top: 0.7rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-soft);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.7);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-box,
+  .card-bg {
+    transition: none !important;
+  }
+}
