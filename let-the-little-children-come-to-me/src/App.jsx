@@ -11,7 +11,7 @@ export default function App() {
     setIndex((i) => (i + 1) % cards.length)
   }, [])
 
-  // Autoplay loops forever — there is no "end" to rest on.
+  // The Cards autoplay loops forever — there is no "end" to rest on.
   useEffect(() => {
     if (!playing) return
     const t = setTimeout(advance, DWELL_MS)
