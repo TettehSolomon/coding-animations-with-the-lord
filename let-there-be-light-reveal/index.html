@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Let There Be Light · reveal cut</title>
+<!-- ======================================================
+     Coding Animations with the Lord — Episode 1 (reveal cut)
+     Genesis 1:2–4 (King James Version)
+
+     A format prototype. No scroll, no auto-play: the viewer
+     DRAGS a point of light across the void and wipes the
+     darkness away. Once enough of the deep is uncovered, the
+     light floods — "And God said, Let there be light" — and
+     the scene resolves into the dividing of light from dark.
+
+     Single, self-contained file on purpose: double-click to run.
+     ====================================================== -->
+<style>
+  :root {
+    --gold: #ffd98a;
+    --gold-soft: #f3e4c0;
+    --ink: #04060a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: #000;
+    font-family: Georgia, 'Times New Roman', serif;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- Portrait "phone" frame ---------- */
+  .app {
+    position: relative;
+    height: 100dvh;
+    width: min(100%, 520px);
+    margin: 0 auto;
+    overflow: hidden;
+    background: var(--ink);
+    user-select: none;
+    touch-action: none;           /* let us own the drag */
+    cursor: crosshair;
+  }
+
+  /* ---------- The created world, hidden beneath the veil ---------- */
+  .scene {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(120% 70% at 50% 72%, rgba(255, 214, 140, 0.95) 0%, rgba(255, 170, 90, 0.55) 22%, rgba(120, 90, 130, 0.35) 48%, rgba(40, 38, 80, 0.2) 68%, transparent 80%),
+      linear-gradient(to bottom, #1a1546 0%, #3a2a66 34%, #8a5a7e 56%, #e8a15c 74%, #ffd98a 88%, #fff3d6 100%);
+  }
+  /* The horizon: light divided from the waters below */
+  .scene::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    top: 72%;
+    bottom: 0;
+    background:
+      linear-gradient(to bottom, rgba(255, 220, 150, 0.35) 0%, rgba(30, 24, 48, 0.55) 60%, rgba(12, 10, 26, 0.85) 100%);
+    box-shadow: 0 -1px 24px rgba(255, 222, 158, 0.5);
+    border-top: 1px solid rgba(255, 240, 210, 0.55);
+  }
+
+  .sun {
+    position: absolute;
+    left: 50%;
+    top: 72%;
+    width: 46%;
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: radial-gradient(circle, #fff7e4 0%, #ffe6ad 34%, rgba(255, 196, 120, 0.4) 60%, transparent 72%);
+    filter: blur(2px);
+  }
+
+  /* ---------- The veil: canvas the viewer wipes away ---------- */
+  #veil {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    transition: opacity 1.3s ease;
+  }
+
+  /* ---------- Sunburst that blooms on "let there be light" ---------- */
+  .burst {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 10px;
+    height: 10px;
+    transform: translate(-50%, -50%) scale(0);
+    border-radius: 50%;
+    background: radial-gradient(circle, #fffdf6 0%, #ffe9bd 30%, rgba(255, 213, 138, 0.5) 55%, transparent 72%);
+    opacity: 0;
+    pointer-events: none;
+    filter: blur(6px);
+  }
+  .app.is-lit .burst { animation: bloom 1.6s ease-out forwards; }
+  @keyframes bloom {
+    0%   { transform: translate(-50%, -50%) scale(0);  opacity: 0; }
+    30%  { opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(60); opacity: 0; }
+  }
+
+  /* ---------- Floating gold motes ---------- */
+  .motes { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  .mote {
+    position: absolute;
+    bottom: -12px;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 8px 2px rgba(255, 217, 138, 0.7);
+    opacity: 0;
+  }
+  .app.is-lit .mote { animation: rise var(--dur) ease-in var(--delay) infinite; }
+  @keyframes rise {
+    0%   { transform: translateY(0) translateX(0);        opacity: 0; }
+    12%  { opacity: 0.9; }
+    100% { transform: translateY(-104vh) translateX(var(--drift)); opacity: 0; }
+  }
+
+  /* ---------- Story segmented progress bar ---------- */
+  .ui-top {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    z-index: 6;
+    padding: calc(env(safe-area-inset-top) + 12px) 12px 0;
+    pointer-events: none;
+  }
+  .story-bar { display: flex; gap: 6px; }
+  .story-segment {
+    flex: 1;
+    height: 3px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.24);
+    overflow: hidden;
+  }
+  .story-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--gold), #fff4d6);
+    box-shadow: 0 0 10px rgba(255, 217, 138, 0.5);
+    transition: width 0.5s ease;
+  }
+  .episode-tag {
+    text-align: center;
+    font-family: Georgia, serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(255, 248, 238, 0.78);
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.7);
+    padding: 12px 4px 0;
+  }
+
+  /* ---------- Verse block ---------- */
+  .words {
+    position: absolute;
+    left: 0; right: 0;
+    bottom: 0;
+    z-index: 6;
+    padding: 26px 26px calc(env(safe-area-inset-bottom, 0px) + 30px);
+    text-align: center;
+    pointer-events: none;
+    background: linear-gradient(to top, rgba(6, 5, 12, 0.82) 0%, rgba(6, 5, 12, 0.38) 55%, transparent 100%);
+  }
+  .caption {
+    font-size: 0.64rem;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--gold);
+    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.9);
+    margin-bottom: 0.7rem;
+  }
+  .verse {
+    font-style: italic;
+    font-size: clamp(1.05rem, 4.6vw, 1.32rem);
+    line-height: 1.5;
+    color: #fff;
+    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.95);
+    transition: opacity 0.6s ease;
+    max-width: 30ch;
+    margin: 0 auto;
+  }
+  .ref {
+    margin-top: 0.9rem;
+    font-size: 0.66rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold-soft);
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
+  }
+
+  /* ---------- Drag hint (pulses until first touch) ---------- */
+  .hint {
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 6;
+    text-align: center;
+    color: rgba(255, 248, 238, 0.9);
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9);
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+  }
+  .hint .orb {
+    width: 54px; height: 54px;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #fff7e4 0%, #ffd98a 45%, rgba(255, 217, 138, 0.15) 75%, transparent 80%);
+    animation: pulse 2.2s ease-in-out infinite;
+  }
+  .hint span {
+    font-size: 0.68rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1);    opacity: 0.85; }
+    50%      { transform: scale(1.18); opacity: 1; }
+  }
+
+  /* ---------- Replay ---------- */
+  .replay {
+    position: absolute;
+    left: 50%;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 150px);
+    transform: translateX(-50%);
+    z-index: 7;
+    pointer-events: auto;
+    padding: 9px 20px;
+    font-family: Georgia, serif;
+    font-size: 0.64rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold);
+    background: rgba(255, 217, 138, 0.12);
+    border: 1px solid rgba(255, 217, 138, 0.42);
+    border-radius: 999px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.6s ease, background 0.2s ease;
+  }
+  .replay:hover { background: rgba(255, 217, 138, 0.26); }
+
+  .is-hidden { opacity: 0 !important; }
+  .show { opacity: 1 !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .app.is-lit .mote,
+    .app.is-lit .burst,
+    .hint .orb { animation: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="app" id="app">
+    <div class="scene"><div class="sun"></div></div>
+
+    <canvas id="veil"></canvas>
+
+    <div class="burst"></div>
+    <div class="motes" id="motes"></div>
+
+    <div class="ui-top">
+      <div class="story-bar">
+        <div class="story-segment"><div class="story-fill" id="seg0"></div></div>
+        <div class="story-segment"><div class="story-fill" id="seg1"></div></div>
+        <div class="story-segment"><div class="story-fill" id="seg2"></div></div>
+      </div>
+      <div class="episode-tag">Coding Animations with the Lord · Episode 1</div>
+    </div>
+
+    <div class="hint" id="hint">
+      <div class="orb"></div>
+      <span>drag to part the darkness</span>
+    </div>
+
+    <div class="words">
+      <div class="caption" id="caption">Genesis 1:2</div>
+      <div class="verse" id="verse">
+        And the earth was without form, and void; and darkness was upon
+        the face of the deep. And the Spirit of God moved upon the face of the waters.
+      </div>
+      <div class="ref">King James Version</div>
+    </div>
+
+    <button class="replay" id="replay">↻ Replay</button>
+  </div>
+
+<script>
+(() => {
+  const app     = document.getElementById('app');
+  const canvas  = document.getElementById('veil');
+  const ctx     = canvas.getContext('2d');
+  const hint    = document.getElementById('hint');
+  const caption = document.getElementById('caption');
+  const verse   = document.getElementById('verse');
+  const replay  = document.getElementById('replay');
+  const motes   = document.getElementById('motes');
+  const segs     = [0,1,2].map(i => document.getElementById('seg' + i));
+
+  const BEATS = [
+    { cap: 'Genesis 1:2', text: 'And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters.' },
+    { cap: 'Genesis 1:3', text: 'And God said, Let there be light: and there was light.' },
+    { cap: 'Genesis 1:4', text: 'And God saw the light, that it was good: and God divided the light from the darkness.' },
+  ];
+
+  let dpr, W, H, brush;
+  const CELL = 26;          // coarse grid for coverage, in CSS px
+  let cols, rows, visited, target;
+  let lit = false, started = false;
+  let last = null;
+
+  function paintVeil() {
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0,    '#02030a');
+    g.addColorStop(0.55, '#070a1a');
+    g.addColorStop(1,    '#0b1028');
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+    // a few faint cold ripples on "the face of the deep"
+    ctx.globalCompositeOperation = 'lighter';
+    for (let i = 0; i < 26; i++) {
+      const x = Math.random() * W, y = H * 0.35 + Math.random() * H * 0.6;
+      const r = 40 + Math.random() * 120;
+      const rg = ctx.createRadialGradient(x, y, 0, x, y, r);
+      rg.addColorStop(0, 'rgba(70,90,150,0.05)');
+      rg.addColorStop(1, 'rgba(70,90,150,0)');
+      ctx.fillStyle = rg;
+      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  function size() {
+    const rect = app.getBoundingClientRect();
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = Math.round(rect.width  * dpr);
+    H = Math.round(rect.height * dpr);
+    canvas.width = W; canvas.height = H;
+    brush = Math.round(Math.min(W, H) * 0.11);
+    cols = Math.ceil(rect.width  / CELL);
+    rows = Math.ceil(rect.height / CELL);
+    target = cols * rows * 0.46;      // uncover ~46% to trigger the light
+    visited = new Set();
+    paintVeil();
+  }
+
+  function erase(cssX, cssY) {
+    const x = cssX * dpr, y = cssY * dpr;
+    ctx.globalCompositeOperation = 'destination-out';
+    const rg = ctx.createRadialGradient(x, y, 0, x, y, brush);
+    rg.addColorStop(0,    'rgba(0,0,0,1)');
+    rg.addColorStop(0.6,  'rgba(0,0,0,0.6)');
+    rg.addColorStop(1,    'rgba(0,0,0,0)');
+    ctx.fillStyle = rg;
+    ctx.beginPath(); ctx.arc(x, y, brush, 0, Math.PI * 2); ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
+
+    // coverage: mark grid cells within the brush
+    const c0 = Math.floor((cssX - brush/dpr) / CELL), c1 = Math.floor((cssX + brush/dpr) / CELL);
+    const r0 = Math.floor((cssY - brush/dpr) / CELL), r1 = Math.floor((cssY + brush/dpr) / CELL);
+    for (let c = c0; c <= c1; c++)
+      for (let r = r0; r <= r1; r++)
+        if (c >= 0 && r >= 0 && c < cols && r < rows) visited.add(c + ',' + r);
+
+    const p = Math.min(1, visited.size / target);
+    segs[0].style.width = (p * 100) + '%';
+    if (p >= 1 && !lit) letThereBeLight();
+  }
+
+  function stroke(cssX, cssY) {
+    if (lit) return;
+    if (!started) { started = true; hint.classList.add('is-hidden'); }
+    if (last) {
+      const dx = cssX - last.x, dy = cssY - last.y;
+      const steps = Math.max(1, Math.hypot(dx, dy) / (brush / dpr / 2));
+      for (let i = 1; i <= steps; i++) erase(last.x + dx * i / steps, last.y + dy * i / steps);
+    } else {
+      erase(cssX, cssY);
+    }
+    last = { x: cssX, y: cssY };
+  }
+
+  function spawnMotes() {
+    motes.innerHTML = '';
+    for (let i = 0; i < 16; i++) {
+      const m = document.createElement('div');
+      m.className = 'mote';
+      m.style.left = Math.random() * 100 + '%';
+      m.style.setProperty('--dur',   (6 + Math.random() * 6) + 's');
+      m.style.setProperty('--delay', (Math.random() * 5) + 's');
+      m.style.setProperty('--drift', (Math.random() * 60 - 30) + 'px');
+      const s = 3 + Math.random() * 4;
+      m.style.width = m.style.height = s + 'px';
+      motes.appendChild(m);
+    }
+  }
+
+  function setBeat(i) {
+    verse.style.opacity = '0';
+    setTimeout(() => {
+      caption.textContent = BEATS[i].cap;
+      verse.textContent   = BEATS[i].text;
+      verse.style.opacity = '1';
+    }, 350);
+  }
+
+  function letThereBeLight() {
+    lit = true;
+    app.classList.add('is-lit');
+    canvas.style.opacity = '0';          // darkness dissolves
+    hint.classList.add('is-hidden');
+    segs[1].style.width = '100%';
+    spawnMotes();
+    setBeat(1);                           // "Let there be light"
+    setTimeout(() => {                    // ... and God saw that it was good
+      segs[2].style.width = '100%';
+      setBeat(2);
+      replay.classList.add('show');
+    }, 2600);
+  }
+
+  function reset() {
+    lit = false; started = false; last = null;
+    app.classList.remove('is-lit');
+    canvas.style.opacity = '1';
+    replay.classList.remove('show');
+    hint.classList.remove('is-hidden');
+    segs.forEach(s => s.style.width = '0%');
+    motes.innerHTML = '';
+    setBeat(0);
+    size();
+  }
+
+  // ---- input: mouse paints on hover, touch paints on drag ----
+  app.addEventListener('pointerdown', (e) => { last = null; stroke(x(e), y(e)); });
+  app.addEventListener('pointermove', (e) => {
+    const touching = e.pointerType !== 'mouse' ? e.buttons === 0 ? false : true : true;
+    if (e.pointerType !== 'mouse' && e.buttons === 0) return;  // touch: only while down
+    stroke(x(e), y(e));
+  });
+  app.addEventListener('pointerup', () => { last = null; });
+  app.addEventListener('pointerleave', () => { last = null; });
+
+  const rectOf = () => app.getBoundingClientRect();
+  function x(e){ return e.clientX - rectOf().left; }
+  function y(e){ return e.clientY - rectOf().top; }
+
+  replay.addEventListener('click', reset);
+  window.addEventListener('resize', () => { if (!lit) size(); });
+
+  size();
+})();
+</script>
+</body>
+</html>
