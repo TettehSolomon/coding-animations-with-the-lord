@@ -1,102 +1,251 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>The Return of the Prodigal Son · zoom cut</title>
-<!-- ======================================================
-     Coding Animations with the Lord — prototype
-     The Prodigal Son · Luke 15 (King James Version)
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>The Return of the Prodigal Son · zoom cut</title>
+  <!--
+  Coding Animations with the Lord
+  Episode 5: The Return of the Prodigal Son
 
-     One masterpiece, one slow camera. Rembrandt's "Return of
-     the Prodigal Son" (c. 1668, public domain) plays as a
-     guided deep-zoom: the camera pushes from detail to detail
-     — the father's bowed face, his two hands, the son's worn
-     feet, the watching elder brother — and the verse for each
-     beat fades in. It plays on its own; tap to skip ahead.
+  This one is a slow, guided look at mercy. Rembrandt's "The Return of the
+  Prodigal Son" carries the whole story: the son returning in shame, the father
+  running in love, the robe and ring and welcome, and the elder brother standing
+  just outside the feast. The camera moves from detail to detail — the father's
+  bowed posture, the son's worn feet, the embrace, the welcome — while each beat
+  of Scripture fades in and the painting becomes the sermon.
 
-     Camera = a background-image whose size (zoom) and position
-     (focal point) transition slowly. Focal %s are read off the
-     real 3840x5011 scan and are the only things you'd tune.
-     ====================================================== -->
-<style>
-  :root { --gold:#ffd98a; --gold-soft:#f3e4c0; }
-  * { box-sizing:border-box; margin:0; padding:0; }
-  html, body { height:100%; background:#000; font-family:Georgia,'Times New Roman',serif; overflow:hidden; -webkit-font-smoothing:antialiased; }
+  "For this my son was dead, and is alive again; he was lost, and is found."
+  — Luke 15:24 (KJV)
 
-  .app {
-    position:relative;
-    height:100dvh;
-    width:min(100%, 520px);
-    margin:0 auto;
-    overflow:hidden;
-    background:#0a0705;
-    cursor:pointer;
-    user-select:none;
-  }
+  Built with plain HTML, CSS and vanilla JS, with a single cinematic image as
+  the stage and a slow zoom as the narrative device. Tap or click to skip ahead,
+  pause, or replay the story.
 
-  /* ---------- The camera over the painting ---------- */
-  .camera {
-    position:absolute;
-    inset:0;
-    background-image:url('art/prodigal.jpg');
-    background-repeat:no-repeat;
-    background-size:160%;                 /* opens slightly in, then pulls back */
-    background-position:46% 50%;
-    transition:background-size var(--dur,6000ms) cubic-bezier(.37,0,.2,1),
-               background-position var(--dur,6000ms) cubic-bezier(.37,0,.2,1);
-    will-change:background-size, background-position;
-  }
+  Painting: Rembrandt · The Return of the Prodigal Son · c.1668 · public domain
+  Source credit: inspired by the cinematic deep-zoom storytelling approach used in
+  other Coding Animations with the Lord episodes.
+-->
+  <style>
+    :root {
+      --gold: #ffd98a;
+      --gold-soft: #f3e4c0;
+    }
 
-  /* cinematic vignette + darkened foot for the verse */
-  .vignette {
-    position:absolute; inset:0; z-index:2; pointer-events:none;
-    background:
-      radial-gradient(120% 90% at 50% 42%, transparent 42%, rgba(6,3,1,0.55) 100%),
-      linear-gradient(to top, rgba(6,3,1,0.92) 0%, rgba(6,3,1,0.35) 26%, transparent 46%);
-  }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-  /* ---------- Story segmented progress bar ---------- */
-  .ui-top { position:absolute; top:0; left:0; right:0; z-index:5; padding:calc(env(safe-area-inset-top) + 12px) 12px 0; pointer-events:none; }
-  .story-bar { display:flex; gap:5px; }
-  .story-segment { flex:1; height:3px; border-radius:3px; background:rgba(255,255,255,0.22); overflow:hidden; }
-  .story-fill { height:100%; width:0%; background:linear-gradient(90deg,var(--gold),#fff4d6); box-shadow:0 0 10px rgba(255,217,138,0.5); }
-  .episode-tag { text-align:center; font-size:0.58rem; letter-spacing:0.3em; text-transform:uppercase; color:rgba(255,248,238,0.76); text-shadow:0 1px 8px rgba(0,0,0,0.8); padding:12px 4px 0; }
+    html,
+    body {
+      height: 100%;
+      background: #000;
+      font-family: Georgia, 'Times New Roman', serif;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
 
-  /* ---------- Verse ---------- */
-  .words { position:absolute; left:0; right:0; bottom:0; z-index:5; padding:26px 28px calc(env(safe-area-inset-bottom,0px) + 30px); text-align:center; pointer-events:none; }
-  .caption { font-size:0.62rem; letter-spacing:0.26em; text-transform:uppercase; color:var(--gold); text-shadow:0 1px 10px rgba(0,0,0,0.95); margin-bottom:0.7rem; transition:opacity .55s ease; }
-  .verse { font-style:italic; font-size:clamp(1.04rem,4.4vw,1.3rem); line-height:1.5; color:#fff; text-shadow:0 2px 14px rgba(0,0,0,0.98); max-width:31ch; margin:0 auto; transition:opacity .55s ease; }
-  .ref { margin-top:0.85rem; font-size:0.64rem; letter-spacing:0.22em; text-transform:uppercase; color:var(--gold-soft); text-shadow:0 1px 8px rgba(0,0,0,0.9); transition:opacity .55s ease; }
+    .app {
+      position: relative;
+      height: 100dvh;
+      width: min(100%, 520px);
+      margin: 0 auto;
+      overflow: hidden;
+      background: #0a0705;
+      cursor: pointer;
+      user-select: none;
+    }
 
-  /* ---------- Credit (always, faint) ---------- */
-  .credit { position:absolute; left:12px; bottom:calc(env(safe-area-inset-bottom,0px) + 10px); z-index:5; font-size:0.5rem; letter-spacing:0.08em; color:rgba(255,244,228,0.4); text-shadow:0 1px 4px rgba(0,0,0,0.9); pointer-events:none; max-width:70%; }
+    /* ---------- The camera over the painting ---------- */
+    .camera {
+      position: absolute;
+      inset: 0;
+      background-image: url('art/prodigal.jpg');
+      background-repeat: no-repeat;
+      background-size: 160%;
+      /* opens slightly in, then pulls back */
+      background-position: 46% 50%;
+      transition: background-size var(--dur, 6000ms) cubic-bezier(.37, 0, .2, 1),
+        background-position var(--dur, 6000ms) cubic-bezier(.37, 0, .2, 1);
+      will-change: background-size, background-position;
+    }
 
-  /* ---------- Controls ---------- */
-  .play-btn {
-    position:absolute; left:50%; bottom:calc(env(safe-area-inset-bottom,0px) + 150px); transform:translateX(-50%);
-    z-index:7; pointer-events:auto; width:44px; height:44px; border-radius:50%;
-    display:grid; place-items:center; font-size:0.8rem;
-    background:rgba(255,217,138,0.14); border:1px solid rgba(255,217,138,0.4); color:var(--gold);
-    cursor:pointer; transition:background .2s ease, opacity .4s ease;
-  }
-  .play-btn:hover { background:rgba(255,217,138,0.28); }
+    /* cinematic vignette + darkened foot for the verse */
+    .vignette {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      background:
+        radial-gradient(120% 90% at 50% 42%, transparent 42%, rgba(6, 3, 1, 0.55) 100%),
+        linear-gradient(to top, rgba(6, 3, 1, 0.92) 0%, rgba(6, 3, 1, 0.35) 26%, transparent 46%);
+    }
 
-  .replay {
-    position:absolute; left:50%; bottom:calc(env(safe-area-inset-bottom,0px) + 150px); transform:translateX(-50%);
-    z-index:7; pointer-events:auto; padding:9px 20px; font-family:Georgia,serif;
-    font-size:0.62rem; letter-spacing:0.22em; text-transform:uppercase; color:var(--gold);
-    background:rgba(255,217,138,0.12); border:1px solid rgba(255,217,138,0.42); border-radius:999px;
-    cursor:pointer; opacity:0; pointer-events:none; transition:opacity .6s ease, background .2s ease;
-  }
-  .replay:hover { background:rgba(255,217,138,0.26); }
-  .replay.show { opacity:1; pointer-events:auto; }
+    /* ---------- Story segmented progress bar ---------- */
+    .ui-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 5;
+      padding: calc(env(safe-area-inset-top) + 12px) 12px 0;
+      pointer-events: none;
+    }
 
-  @media (prefers-reduced-motion: reduce) {
-    .camera { transition-duration:.8s !important; }
-  }
-</style>
+    .story-bar {
+      display: flex;
+      gap: 5px;
+    }
+
+    .story-segment {
+      flex: 1;
+      height: 3px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.22);
+      overflow: hidden;
+    }
+
+    .story-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--gold), #fff4d6);
+      box-shadow: 0 0 10px rgba(255, 217, 138, 0.5);
+    }
+
+    .episode-tag {
+      text-align: center;
+      font-size: 0.58rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: rgba(255, 248, 238, 0.76);
+      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
+      padding: 12px 4px 0;
+    }
+
+    /* ---------- Verse ---------- */
+    .words {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 5;
+      padding: 26px 28px calc(env(safe-area-inset-bottom, 0px) + 30px);
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .caption {
+      font-size: 0.62rem;
+      letter-spacing: 0.26em;
+      text-transform: uppercase;
+      color: var(--gold);
+      text-shadow: 0 1px 10px rgba(0, 0, 0, 0.95);
+      margin-bottom: 0.7rem;
+      transition: opacity .55s ease;
+    }
+
+    .verse {
+      font-style: italic;
+      font-size: clamp(1.04rem, 4.4vw, 1.3rem);
+      line-height: 1.5;
+      color: #fff;
+      text-shadow: 0 2px 14px rgba(0, 0, 0, 0.98);
+      max-width: 31ch;
+      margin: 0 auto;
+      transition: opacity .55s ease;
+    }
+
+    .ref {
+      margin-top: 0.85rem;
+      font-size: 0.64rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold-soft);
+      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.9);
+      transition: opacity .55s ease;
+    }
+
+    /* ---------- Credit (always, faint) ---------- */
+    .credit {
+      position: absolute;
+      left: 12px;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
+      z-index: 5;
+      font-size: 0.5rem;
+      letter-spacing: 0.08em;
+      color: rgba(255, 244, 228, 0.4);
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+      pointer-events: none;
+      max-width: 70%;
+    }
+
+    /* ---------- Controls ---------- */
+    .play-btn {
+      position: absolute;
+      left: 50%;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 150px);
+      transform: translateX(-50%);
+      z-index: 7;
+      pointer-events: auto;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 0.8rem;
+      background: rgba(255, 217, 138, 0.14);
+      border: 1px solid rgba(255, 217, 138, 0.4);
+      color: var(--gold);
+      cursor: pointer;
+      transition: background .2s ease, opacity .4s ease;
+    }
+
+    .play-btn:hover {
+      background: rgba(255, 217, 138, 0.28);
+    }
+
+    .replay {
+      position: absolute;
+      left: 50%;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 150px);
+      transform: translateX(-50%);
+      z-index: 7;
+      pointer-events: auto;
+      padding: 9px 20px;
+      font-family: Georgia, serif;
+      font-size: 0.62rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      background: rgba(255, 217, 138, 0.12);
+      border: 1px solid rgba(255, 217, 138, 0.42);
+      border-radius: 999px;
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .6s ease, background .2s ease;
+    }
+
+    .replay:hover {
+      background: rgba(255, 217, 138, 0.26);
+    }
+
+    .replay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .camera {
+        transition-duration: .8s !important;
+      }
+    }
+  </style>
 </head>
+
 <body>
   <div class="app" id="app">
     <div class="camera" id="camera"></div>
@@ -119,146 +268,161 @@
     <button class="replay" id="replay">↻ Replay</button>
   </div>
 
-<script>
-(() => {
-  // Focal %s read off the real painting (x across, y down).
-  const BEATS = [
-    { bs:'133%', x:'48%', y:'44%', dur:6500, cap:'Luke 15:11–13',
-      text:'A certain man had two sons; and the younger took his journey into a far country, and there wasted his substance with riotous living.' },
-    { bs:'225%', x:'27%', y:'60%', dur:6000, cap:'Luke 15:20',
-      text:'And he arose, and came to his father.' },
-    { bs:'300%', x:'29%', y:'33%', dur:6000, cap:'Luke 15:20',
-      text:'But when he was yet a great way off, his father saw him, and had compassion, and ran, and fell on his neck, and kissed him.' },
-    { bs:'300%', x:'22%', y:'84%', dur:6000, cap:'Luke 15:21',
-      text:'Father, I have sinned against heaven, and in thy sight, and am no more worthy to be called thy son.' },
-    { bs:'360%', x:'31%', y:'59%', dur:5500, cap:'Luke 15:22',
-      text:'Bring forth the best robe, and put it on him; and put a ring on his hand, and shoes on his feet.' },
-    { bs:'240%', x:'80%', y:'31%', dur:6000, cap:'Luke 15:25–28',
-      text:'Now his elder son was angry, and would not go in: therefore came his father out, and intreated him.' },
-    { bs:'133%', x:'50%', y:'45%', dur:7000, cap:'Luke 15:24',
-      text:'For this my son was dead, and is alive again; he was lost, and is found.' },
-  ];
-  const HOLD = 2200;   // ms the camera rests on a detail before moving on
+  <script>
+    (() => {
+      // Focal %s read off the real painting (x across, y down).
+      const BEATS = [
+        {
+          bs: '133%', x: '48%', y: '44%', dur: 6500, cap: 'Luke 15:11–13',
+          text: 'A certain man had two sons; and the younger took his journey into a far country, and there wasted his substance with riotous living.'
+        },
+        {
+          bs: '225%', x: '27%', y: '60%', dur: 6000, cap: 'Luke 15:20',
+          text: 'And he arose, and came to his father.'
+        },
+        {
+          bs: '300%', x: '29%', y: '33%', dur: 6000, cap: 'Luke 15:20',
+          text: 'But when he was yet a great way off, his father saw him, and had compassion, and ran, and fell on his neck, and kissed him.'
+        },
+        {
+          bs: '300%', x: '22%', y: '84%', dur: 6000, cap: 'Luke 15:21',
+          text: 'Father, I have sinned against heaven, and in thy sight, and am no more worthy to be called thy son.'
+        },
+        {
+          bs: '360%', x: '31%', y: '59%', dur: 5500, cap: 'Luke 15:22',
+          text: 'Bring forth the best robe, and put it on him; and put a ring on his hand, and shoes on his feet.'
+        },
+        {
+          bs: '240%', x: '80%', y: '31%', dur: 6000, cap: 'Luke 15:25–28',
+          text: 'Now his elder son was angry, and would not go in: therefore came his father out, and intreated him.'
+        },
+        {
+          bs: '133%', x: '50%', y: '45%', dur: 7000, cap: 'Luke 15:24',
+          text: 'For this my son was dead, and is alive again; he was lost, and is found.'
+        },
+      ];
+      const HOLD = 2200;   // ms the camera rests on a detail before moving on
 
-  const app     = document.getElementById('app');
-  const camera  = document.getElementById('camera');
-  const caption = document.getElementById('caption');
-  const verse   = document.getElementById('verse');
-  const refEl   = document.getElementById('ref');
-  const bar      = document.getElementById('bar');
-  const playBtn = document.getElementById('play');
-  const replay  = document.getElementById('replay');
+      const app = document.getElementById('app');
+      const camera = document.getElementById('camera');
+      const caption = document.getElementById('caption');
+      const verse = document.getElementById('verse');
+      const refEl = document.getElementById('ref');
+      const bar = document.getElementById('bar');
+      const playBtn = document.getElementById('play');
+      const replay = document.getElementById('replay');
 
-  // build the story-bar segments
-  const fills = BEATS.map(() => {
-    const seg  = document.createElement('div'); seg.className = 'story-segment';
-    const fill = document.createElement('div'); fill.className = 'story-fill';
-    seg.appendChild(fill); bar.appendChild(seg); return fill;
-  });
+      // build the story-bar segments
+      const fills = BEATS.map(() => {
+        const seg = document.createElement('div'); seg.className = 'story-segment';
+        const fill = document.createElement('div'); fill.className = 'story-fill';
+        seg.appendChild(fill); bar.appendChild(seg); return fill;
+      });
 
-  let i = -1, playing = true, nextTimer = null, beatStart = 0, elapsed = 0;
+      let i = -1, playing = true, nextTimer = null, beatStart = 0, elapsed = 0;
 
-  const total = (b) => b.dur + HOLD;
+      const total = (b) => b.dur + HOLD;
 
-  function setFill(el, pct, ms) {
-    el.style.transition = ms ? `width ${ms}ms linear` : 'none';
-    el.style.width = pct + '%';
-  }
+      function setFill(el, pct, ms) {
+        el.style.transition = ms ? `width ${ms}ms linear` : 'none';
+        el.style.width = pct + '%';
+      }
 
-  function showVerse(b) {
-    caption.style.opacity = verse.style.opacity = refEl.style.opacity = '0';
-    setTimeout(() => {
-      caption.textContent = b.cap;
-      verse.textContent   = b.text;
-      refEl.textContent   = 'King James Version';
-      caption.style.opacity = verse.style.opacity = refEl.style.opacity = '1';
-    }, 300);
-  }
+      function showVerse(b) {
+        caption.style.opacity = verse.style.opacity = refEl.style.opacity = '0';
+        setTimeout(() => {
+          caption.textContent = b.cap;
+          verse.textContent = b.text;
+          refEl.textContent = 'King James Version';
+          caption.style.opacity = verse.style.opacity = refEl.style.opacity = '1';
+        }, 300);
+      }
 
-  function go(n) {
-    clearTimeout(nextTimer);
-    i = n;
-    const b = BEATS[i];
+      function go(n) {
+        clearTimeout(nextTimer);
+        i = n;
+        const b = BEATS[i];
 
-    camera.style.setProperty('--dur', b.dur + 'ms');
-    // next frame so the duration applies before the move
-    requestAnimationFrame(() => {
-      camera.style.backgroundSize = b.bs;
-      camera.style.backgroundPosition = b.x + ' ' + b.y;
-    });
+        camera.style.setProperty('--dur', b.dur + 'ms');
+        // next frame so the duration applies before the move
+        requestAnimationFrame(() => {
+          camera.style.backgroundSize = b.bs;
+          camera.style.backgroundPosition = b.x + ' ' + b.y;
+        });
 
-    showVerse(b);
+        showVerse(b);
 
-    fills.forEach((f, k) => {
-      if (k < i) setFill(f, 100, 0);
-      else if (k > i) setFill(f, 0, 0);
-      else { setFill(f, 0, 0); requestAnimationFrame(() => playing && setFill(f, 100, total(b))); }
-    });
+        fills.forEach((f, k) => {
+          if (k < i) setFill(f, 100, 0);
+          else if (k > i) setFill(f, 0, 0);
+          else { setFill(f, 0, 0); requestAnimationFrame(() => playing && setFill(f, 100, total(b))); }
+        });
 
-    beatStart = performance.now();
-    elapsed = 0;
-    if (playing) schedule(total(b));
-  }
+        beatStart = performance.now();
+        elapsed = 0;
+        if (playing) schedule(total(b));
+      }
 
-  function schedule(ms) {
-    clearTimeout(nextTimer);
-    nextTimer = setTimeout(() => {
-      if (i < BEATS.length - 1) go(i + 1);
-      else finish();
-    }, ms);
-  }
+      function schedule(ms) {
+        clearTimeout(nextTimer);
+        nextTimer = setTimeout(() => {
+          if (i < BEATS.length - 1) go(i + 1);
+          else finish();
+        }, ms);
+      }
 
-  function finish() {
-    playing = false;
-    playBtn.style.opacity = '0';
-    playBtn.style.pointerEvents = 'none';
-    replay.classList.add('show');
-  }
+      function finish() {
+        playing = false;
+        playBtn.style.opacity = '0';
+        playBtn.style.pointerEvents = 'none';
+        replay.classList.add('show');
+      }
 
-  function pause() {
-    if (!playing) return;
-    playing = false;
-    clearTimeout(nextTimer);
-    elapsed += performance.now() - beatStart;
-    const frac = Math.min(1, elapsed / total(BEATS[i]));
-    setFill(fills[i], frac * 100, 0);      // freeze the segment
-    playBtn.textContent = '▶';
-  }
+      function pause() {
+        if (!playing) return;
+        playing = false;
+        clearTimeout(nextTimer);
+        elapsed += performance.now() - beatStart;
+        const frac = Math.min(1, elapsed / total(BEATS[i]));
+        setFill(fills[i], frac * 100, 0);      // freeze the segment
+        playBtn.textContent = '▶';
+      }
 
-  function resume() {
-    if (playing || i < 0) return;
-    playing = true;
-    playBtn.textContent = '❚❚';
-    const remaining = Math.max(0, total(BEATS[i]) - elapsed);
-    setFill(fills[i], 100, remaining);
-    beatStart = performance.now();
-    schedule(remaining);
-  }
+      function resume() {
+        if (playing || i < 0) return;
+        playing = true;
+        playBtn.textContent = '❚❚';
+        const remaining = Math.max(0, total(BEATS[i]) - elapsed);
+        setFill(fills[i], 100, remaining);
+        beatStart = performance.now();
+        schedule(remaining);
+      }
 
-  // ---- input ----
-  playBtn.addEventListener('click', (e) => { e.stopPropagation(); playing ? pause() : resume(); });
-  replay.addEventListener('click',  (e) => { e.stopPropagation(); replay.classList.remove('show'); playBtn.style.opacity=''; playBtn.style.pointerEvents=''; playBtn.textContent='❚❚'; playing=true; go(0); });
-  app.addEventListener('click', () => {            // tap to skip ahead
-    if (!playing && i >= 0 && i < BEATS.length - 1) return;   // paused: ignore stage tap
-    clearTimeout(nextTimer);
-    if (i < BEATS.length - 1) { playing = true; playBtn.textContent='❚❚'; go(i + 1); }
-  });
-  document.addEventListener('keydown', (e) => {
-    if (e.code === 'Space') { e.preventDefault(); playing ? pause() : resume(); }
-    if (e.code === 'ArrowRight' && i < BEATS.length - 1) { clearTimeout(nextTimer); playing = true; go(i + 1); }
-  });
+      // ---- input ----
+      playBtn.addEventListener('click', (e) => { e.stopPropagation(); playing ? pause() : resume(); });
+      replay.addEventListener('click', (e) => { e.stopPropagation(); replay.classList.remove('show'); playBtn.style.opacity = ''; playBtn.style.pointerEvents = ''; playBtn.textContent = '❚❚'; playing = true; go(0); });
+      app.addEventListener('click', () => {            // tap to skip ahead
+        if (!playing && i >= 0 && i < BEATS.length - 1) return;   // paused: ignore stage tap
+        clearTimeout(nextTimer);
+        if (i < BEATS.length - 1) { playing = true; playBtn.textContent = '❚❚'; go(i + 1); }
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.code === 'Space') { e.preventDefault(); playing ? pause() : resume(); }
+        if (e.code === 'ArrowRight' && i < BEATS.length - 1) { clearTimeout(nextTimer); playing = true; go(i + 1); }
+      });
 
-  // reduced motion → shorter dwell so it isn't sluggish
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    BEATS.forEach(b => b.dur = 1200);
-  }
+      // reduced motion → shorter dwell so it isn't sluggish
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        BEATS.forEach(b => b.dur = 1200);
+      }
 
-  // kick off after the painting has decoded (so the opening move is smooth)
-  const img = new Image();
-  img.onload = () => go(0);
-  img.onerror = () => go(0);
-  img.src = 'art/prodigal.jpg';
-})();
-</script>
+      // kick off after the painting has decoded (so the opening move is smooth)
+      const img = new Image();
+      img.onload = () => go(0);
+      img.onerror = () => go(0);
+      img.src = 'art/prodigal.jpg';
+    })();
+  </script>
 </body>
+
 </html>
